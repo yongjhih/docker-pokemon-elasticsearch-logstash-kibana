@@ -1,0 +1,32 @@
+logstash:
+  image: logstash
+  links:
+   - elasticsearch
+  volumes:
+   - ./logstash.conf:/config-dir/logstash.conf
+  command: logstash -f /config-dir/logstash.conf
+
+elasticsearch:
+  image: elasticsearch
+  volumes:
+   - ./logstash-template.json:/elasticsearch/config/templates/logstash-template.json
+   - /usr/share/elasticsearch/data
+  volumes_from:
+    - elasticsearch-data
+  ports:
+   - '9200:9200'
+
+elasticsearch-data:
+  image: elasticsearch
+  volumes:
+   - /usr/share/elasticsearch/data
+  command: ['ls']
+
+kibana:
+  image: kibana
+  links:
+   - elasticsearch
+  environment:
+   ELASTICSEARCH_URL: $ELASTICSEARCH_URL
+  ports:
+   - '5601:5601'
